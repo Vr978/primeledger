@@ -21,6 +21,59 @@ PrimeLedger is a microservices-based banking application dealing with user accou
   - **History**: View transaction history filtered by user
   - **Event Driven**: Uses Apache Kafka for asynchronous transaction logging
 
+## 🏗 Microservices Architecture
+
+This project is designed as a distributed system where each service has a specific responsibility, ensuring scalability and maintainability.
+
+### System Architecture Diagram
+
+```mermaid
+graph TD
+    User[Client (Postman/Mobile/Web)] -->|HTTP/REST| Gateway{API Gateway / Load Balancer}
+    Gateway -->|Auth & Accounts| Auth[Account Service :8081]
+    Gateway -->|Transactions| Trans[Transaction Service :8082]
+    
+    subgraph "Data Layer"
+        Auth -->|Read/Write| DB1[(Database: Users & Accounts)]
+        Trans -->|Read/Write| DB2[(Database: Transactions)]
+    end
+
+    subgraph "Event Driven Async Layer"
+        Trans -->|Produces Event| Kafka{Apache Kafka}
+        Kafka -->|Consumes Event| Notif[Notification Service :8083]
+    end
+
+    classDef service fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef db fill:#ccf,stroke:#333,stroke-width:2px;
+    classDef event fill:#fdd,stroke:#333,stroke-width:2px;
+
+    class Auth,Trans,Notif service;
+    class DB1,DB2 db;
+    class Kafka event;
+```
+
+### Why Microservices?
+- **Decoupling**: The *Account Service* manages user identity and authentication, while the *Transaction Service* handles financial movements. They communicate via well-defined APIs.
+- **Independent Scalability**: If transaction volume spikes, we can scale the *Transaction Service* independently of the *Account Service*.
+- **Resilience**: A failure in the *Notification Service* (e.g., email server down) does not block a user from depositing money.
+
+## 📡 Kafka Event-Driven Flow
+
+Apache Kafka acts as the backbone for asynchronous communication between services.
+
+1.  **Event Production**:
+    -   When a user completes a **Deposit** or **Withdrawal** in the *Transaction Service*, the system does not just update the database.
+    -   It also **publishes an event** to the `transactions` Kafka topic.
+    -   *Example Event*: `User alice deposited 1000.0 to account 1`
+
+2.  **Event Consumption**:
+    -   The *Notification Service* is constantly listening (subscribing) to the `transactions` topic.
+    -   As soon as the message arrives, it consumes it.
+
+3.  **Action**:
+    -   In a real-world scenario, this service would send an **Email** or **SMS** alert to the user ("You just spent $50").
+    -   In this demo, it logs the event, demonstrating how side-effects (notifications) are decoupled from the main critical path (money movement).
+
 ## 🛠 Tech Stack
 
 - **Java 1.8+**
