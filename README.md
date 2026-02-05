@@ -53,7 +53,7 @@ PrimeLedger is a microservices-based banking application dealing with user accou
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Vr978/primeledger.git
    cd primeledger
    ```
 
