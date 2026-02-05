@@ -29,19 +29,20 @@ This project is designed as a distributed system where each service has a specif
 
 ```mermaid
 graph TD
-    User[Client (Postman/Mobile/Web)] -->|HTTP/REST| Gateway{API Gateway / Load Balancer}
-    Gateway -->|Auth & Accounts| Auth[Account Service :8081]
-    Gateway -->|Transactions| Trans[Transaction Service :8082]
+    User["Client (Postman/Mobile/Web)"] -->|HTTP/REST| Gateway{"API Gateway / Load Balancer"}
+    Gateway -->|"Auth & Accounts"| Auth["Account Service :8081"]
+    Gateway -->|Transactions| Trans["Transaction Service :8082"]
     
     subgraph "Data Layer"
-        Auth -->|Read/Write| DB1[(Database: Users & Accounts)]
-        Trans -->|Read/Write| DB2[(Database: Transactions)]
+        Auth -->|"Read/Write"| DB1[("Database: Users & Accounts")]
+        Trans -->|"Read/Write"| DB2[("Database: Transactions")]
     end
 
     subgraph "Event Driven Async Layer"
-        Trans -->|Produces Event| Kafka{Apache Kafka}
-        Kafka -->|Consumes Event| Notif[Notification Service :8083]
+        Trans -->|"Produces Event"| Kafka{Apache Kafka}
+        Kafka -->|"Consumes Event"| Notif["Notification Service :8083"]
     end
+
 
     classDef service fill:#f9f,stroke:#333,stroke-width:2px;
     classDef db fill:#ccf,stroke:#333,stroke-width:2px;
