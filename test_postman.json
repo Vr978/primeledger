@@ -1,0 +1,729 @@
+{
+    "info": {
+        "name": "PrimeLedger - Complete Test Suite (Phase 6)",
+        "description": "Comprehensive testing with Access + Refresh Tokens, all features, edge cases, and security validation",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Setup: User 1 (Alice)",
+            "item": [
+                {
+                    "name": "1.1 Register Alice",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"alice123\",\n  \"email\": \"alice@bank.com\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/register",
+                        "description": "Register alice - Returns access + refresh tokens"
+                    }
+                },
+                {
+                    "name": "1.2 Login Alice",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"alice123\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/login",
+                        "description": "Access: eyJhbGc... (15min)\nRefresh: uuid-string (7 days)"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Setup: User 2 (Bob)",
+            "item": [
+                {
+                    "name": "2.1 Register Bob",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"bob\",\n  \"password\": \"bob123\",\n  \"email\": \"bob@bank.com\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/register"
+                    }
+                },
+                {
+                    "name": "2.2 Login Bob",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"bob\",\n  \"password\": \"bob123\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/login"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Alice - Account Operations",
+            "item": [
+                {
+                    "name": "3.1 Create Alice Account",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"ownerName\": \"Alice Savings\"\n}"
+                        },
+                        "url": "http://localhost:8081/accounts",
+                        "description": "Creates account linked to Alice (userId=1, accountId=1)"
+                    }
+                },
+                {
+                    "name": "3.2 Get Alice Accounts",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "url": "http://localhost:8081/accounts",
+                        "description": "Should return only Alice's accounts"
+                    }
+                },
+                {
+                    "name": "3.3 Get Account by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "url": "http://localhost:8081/accounts/1",
+                        "description": "Returns Alice's account details with balance"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Alice - Transaction Operations",
+            "item": [
+                {
+                    "name": "4.1 Deposit $1000",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountId\": 1,\n  \"amount\": 1000.0\n}"
+                        },
+                        "url": "http://localhost:8082/transactions/deposit",
+                        "description": "Alice deposits $1000. Balance: 0 → 1000"
+                    }
+                },
+                {
+                    "name": "4.2 Check Balance After Deposit",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "url": "http://localhost:8081/accounts/1",
+                        "description": "Verify balance = 1000.0"
+                    }
+                },
+                {
+                    "name": "4.3 Withdraw $300",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountId\": 1,\n  \"amount\": 300.0\n}"
+                        },
+                        "url": "http://localhost:8082/transactions/withdraw",
+                        "description": "Alice withdraws $300. Balance: 1000 → 700"
+                    }
+                },
+                {
+                    "name": "4.4 Check Balance After Withdrawal",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "url": "http://localhost:8081/accounts/1",
+                        "description": "Verify balance = 700.0"
+                    }
+                },
+                {
+                    "name": "4.5 View Alice Transactions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "url": "http://localhost:8082/transactions",
+                        "description": "Should show 2 transactions (deposit + withdraw)"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Bob - Account & Transactions",
+            "item": [
+                {
+                    "name": "5.1 Create Bob Account",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer BOB_ACCESS_TOKEN"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"ownerName\": \"Bob Checking\"\n}"
+                        },
+                        "url": "http://localhost:8081/accounts",
+                        "description": "Creates account linked to Bob (userId=2, accountId=2)"
+                    }
+                },
+                {
+                    "name": "5.2 Bob Deposits $500",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer BOB_ACCESS_TOKEN"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountId\": 2,\n  \"amount\": 500.0\n}"
+                        },
+                        "url": "http://localhost:8082/transactions/deposit",
+                        "description": "Bob deposits $500"
+                    }
+                },
+                {
+                    "name": "5.3 View Bob Transactions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer BOB_ACCESS_TOKEN"
+                            }
+                        ],
+                        "url": "http://localhost:8082/transactions",
+                        "description": "Should show ONLY Bob's transaction (not Alice's)"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "SECURITY: Cross-User Access Tests",
+            "item": [
+                {
+                    "name": "❌ 6.1 Alice tries to view Bob's account",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "url": "http://localhost:8081/accounts/2",
+                        "description": "SHOULD FAIL: 403 Forbidden - Alice can't access Bob's account"
+                    }
+                },
+                {
+                    "name": "❌ 6.2 Alice tries to deposit to Bob's account",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountId\": 2,\n  \"amount\": 999.0\n}"
+                        },
+                        "url": "http://localhost:8082/transactions/deposit",
+                        "description": "SHOULD FAIL: Alice can't deposit to Bob's account"
+                    }
+                },
+                {
+                    "name": "❌ 6.3 Bob tries to withdraw from Alice's account",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer BOB_ACCESS_TOKEN"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountId\": 1,\n  \"amount\": 100.0\n}"
+                        },
+                        "url": "http://localhost:8082/transactions/withdraw",
+                        "description": "SHOULD FAIL: Bob can't withdraw from Alice's account"
+                    }
+                },
+                {
+                    "name": "✅ 6.4 Alice views only her transactions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "url": "http://localhost:8082/transactions",
+                        "description": "PASS: Should show 2 transactions (Alice's only)"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "EDGE CASES: Withdraw Validation",
+            "item": [
+                {
+                    "name": "❌ 7.1 Withdraw more than balance",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountId\": 1,\n  \"amount\": 10000.0\n}"
+                        },
+                        "url": "http://localhost:8082/transactions/withdraw",
+                        "description": "SHOULD FAIL: Insufficient balance (has only 700)"
+                    }
+                },
+                {
+                    "name": "❌ 7.2 Negative deposit amount",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountId\": 1,\n  \"amount\": -50.0\n}"
+                        },
+                        "url": "http://localhost:8082/transactions/deposit",
+                        "description": "SHOULD FAIL: Negative amounts not allowed"
+                    }
+                },
+                {
+                    "name": "❌ 7.3 Deposit to non-existent account",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountId\": 999,\n  \"amount\": 100.0\n}"
+                        },
+                        "url": "http://localhost:8082/transactions/deposit",
+                        "description": "SHOULD FAIL: Account 999 doesn't exist"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "REFRESH TOKEN: Renewal Flow",
+            "item": [
+                {
+                    "name": "8.1 Refresh Alice's Access Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refreshToken\": \"ALICE_REFRESH_TOKEN\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/refresh",
+                        "description": "Returns new access token (refresh token stays same)"
+                    }
+                },
+                {
+                    "name": "8.2 Use New Access Token",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer NEW_ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "url": "http://localhost:8081/accounts",
+                        "description": "PASS: New token should work"
+                    }
+                },
+                {
+                    "name": "❌ 8.3 Try invalid refresh token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refreshToken\": \"invalid-uuid-12345\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/refresh",
+                        "description": "SHOULD FAIL: Invalid refresh token"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "LOGOUT: Token Revocation",
+            "item": [
+                {
+                    "name": "9.1 Logout Alice (Single Device)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refreshToken\": \"ALICE_REFRESH_TOKEN\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/logout",
+                        "description": "Revokes Alice's refresh token"
+                    }
+                },
+                {
+                    "name": "❌ 9.2 Try refresh after logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refreshToken\": \"ALICE_REFRESH_TOKEN\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/refresh",
+                        "description": "SHOULD FAIL: Token has been revoked"
+                    }
+                },
+                {
+                    "name": "✅ 9.3 Access token still works (stateless)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer ALICE_ACCESS_TOKEN"
+                            }
+                        ],
+                        "url": "http://localhost:8081/accounts",
+                        "description": "PASS: Access token valid until expiry (15 min)"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "MULTI-DEVICE: Logout All",
+            "item": [
+                {
+                    "name": "10.1 Login Alice Device 1",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"alice123\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/login",
+                        "description": "Save as: device1_access, device1_refresh"
+                    }
+                },
+                {
+                    "name": "10.2 Login Alice Device 2",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"alice123\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/login",
+                        "description": "Save as: device2_access, device2_refresh"
+                    }
+                },
+                {
+                    "name": "10.3 Logout from ALL devices",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer DEVICE1_ACCESS"
+                            }
+                        ],
+                        "url": "http://localhost:8081/auth/logout-all",
+                        "description": "Revokes ALL Alice's refresh tokens"
+                    }
+                },
+                {
+                    "name": "❌ 10.4 Device 1 refresh fails",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refreshToken\": \"DEVICE1_REFRESH\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/refresh",
+                        "description": "SHOULD FAIL: All tokens revoked"
+                    }
+                },
+                {
+                    "name": "❌ 10.5 Device 2 refresh fails",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refreshToken\": \"DEVICE2_REFRESH\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/refresh",
+                        "description": "SHOULD FAIL: All tokens revoked"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "AUTHENTICATION: Edge Cases",
+            "item": [
+                {
+                    "name": "❌ 11.1 Access without token",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "http://localhost:8081/accounts",
+                        "description": "SHOULD FAIL: 401 Unauthorized"
+                    }
+                },
+                {
+                    "name": "❌ 11.2 Invalid token format",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer invalid-token-123"
+                            }
+                        ],
+                        "url": "http://localhost:8081/accounts",
+                        "description": "SHOULD FAIL: 401 Unauthorized"
+                    }
+                },
+                {
+                    "name": "❌ 11.3 Expired access token",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer EXPIRED_TOKEN"
+                            }
+                        ],
+                        "url": "http://localhost:8081/accounts",
+                        "description": "SHOULD FAIL after 15 min: 401 Unauthorized"
+                    }
+                },
+                {
+                    "name": "❌ 11.4 Login with wrong password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"wrongpassword\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/login",
+                        "description": "SHOULD FAIL: 401 Invalid credentials"
+                    }
+                },
+                {
+                    "name": "❌ 11.5 Register duplicate username",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"newpass\",\n  \"email\": \"newemail@test.com\"\n}"
+                        },
+                        "url": "http://localhost:8081/auth/register",
+                        "description": "SHOULD FAIL: Username already exists"
+                    }
+                }
+            ]
+        }
+    ]
+}
