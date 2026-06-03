@@ -4,8 +4,10 @@ PrimeLedger is a production-grade, event-driven digital wallet application built
 
 This isn't a tutorial project. It was engineered to solve real distributed systems problems: concurrent balance updates causing lost money (fixed with optimistic locking), duplicate charges on network retries (prevented with idempotency keys), and tightly coupled services that fail together (decoupled via event streaming). Every architectural decision maps to a specific problem in the original monolithic codebase.
 
-## NOTE: The Application is currently hosted on: https://primeledgerwallet.netlify.app/login
-The application frontend is hosted on netlify and backend is hosted on AWS. However the aws stack is destroyed to save cost. If you want to see how Application UI will be, you can check the attached screenshots in README.md. I am planning to upload a working tutorial of the application in future as soon as possible.
+## NOTE: 
+- The Application is currently hosted on: https://primeledgerwallet.netlify.app/login
+
+The application frontend is hosted on netlify and backend is hosted on AWS. However the aws stack is destroyed to save cost. If you want to see how Application UI will be, you can check the attached screenshots in README.md. I am planning to upload a working tutorial of the application in future as soon as possible. Although in the meantime if you are still interested to simulate the application in your local, you can follow the steps in README.md. Thank you!!
 
 ## 🚀 Core Features
 
