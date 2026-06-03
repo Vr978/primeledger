@@ -18,8 +18,13 @@ This isn't a tutorial project. It was engineered to solve real distributed syste
 ---
 
 ## 🏗 System Architecture
-
 ![Architecture Diagram](PrimeledgerWallet.png)
+
+## Application UI Screenshot
+![Login Page](docs/Login.pngpng)
+![Dashboard UI](docs/Dashboard.png)
+![Stripe Checkout](docs/StripeCheckout.png)
+
 
 ### Why This Architecture?
 
