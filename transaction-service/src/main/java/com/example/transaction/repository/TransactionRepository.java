@@ -2,5 +2,12 @@ package com.example.transaction.repository;
 
 import com.example.transaction.model.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface TransactionRepository extends JpaRepository<Transaction, Long> { }
+import java.util.List;
+
+@Repository
+public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+    List<Transaction> findByAccountIdIn(List<Long> accountIds);
+    List<Transaction> findByAccountIdInOrderByCreatedAtDesc(List<Long> accountIds);
+}

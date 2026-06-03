@@ -4,8 +4,10 @@ import com.example.account.dto.AuthResponse;
 import com.example.account.dto.LoginRequest;
 import com.example.account.dto.RefreshTokenRequest;
 import com.example.account.dto.RegisterRequest;
+import com.example.account.model.Account;
 import com.example.account.model.RefreshToken;
 import com.example.account.model.User;
+import com.example.account.repository.AccountRepository;
 import com.example.account.repository.UserRepository;
 import com.example.account.security.JwtUtil;
 import com.example.account.service.RefreshTokenService;
@@ -22,169 +24,126 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-        @Autowired
-        private UserRepository userRepository;
 
-        @Autowired
-        private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
 
-        @Autowired
-        private JwtUtil jwtUtil;
+    @Autowired
+    private AccountRepository accountRepository;
 
-        @Autowired
-        private AuthenticationManager authenticationManager;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-        @Autowired
-        private UserDetailsService userDetailsService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-        @Autowired
-        private RefreshTokenService refreshTokenService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-        @PostMapping("/register")
-        public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
-                try {
-                        // Check if username already exists
-                        if (userRepository.existsByUsername(request.getUsername())) {
-                                return ResponseEntity.badRequest()
-                                                .body(new AuthResponse(null, null, null, "Username already exists"));
-                        }
+    @Autowired
+    private UserDetailsService userDetailsService;
 
-                        // Check if email already exists
-                        if (userRepository.existsByEmail(request.getEmail())) {
-                                return ResponseEntity.badRequest()
-                                                .body(new AuthResponse(null, null, null, "Email already registered"));
-                        }
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
-                        // Create new user
-                        User user = new User();
-                        user.setUsername(request.getUsername());
-                        user.setPassword(passwordEncoder.encode(request.getPassword()));
-                        user.setEmail(request.getEmail());
-                        user.setRole("USER");
-
-                        User savedUser = userRepository.save(user);
-
-                        // Generate access token
-                        UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getUsername());
-                        String accessToken = jwtUtil.generateToken(userDetails);
-
-                        // Generate refresh token
-                        RefreshToken refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
-
-                        return ResponseEntity.ok(
-                                        new AuthResponse(accessToken, refreshToken.getToken(),
-                                                        savedUser.getUsername(),
-                                                        "User registered successfully. You can now create accounts."));
-                } catch (Exception e) {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(new AuthResponse(null, null, null,
-                                                        "Registration failed: " + e.getMessage()));
-                }
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            return ResponseEntity.badRequest()
+                    .body(new AuthResponse(null, null, null, "Email already registered"));
         }
 
-        @PostMapping("/login")
-        public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
-                try {
-                        // Authenticate user
-                        authenticationManager.authenticate(
-                                        new UsernamePasswordAuthenticationToken(
-                                                        request.getUsername(),
-                                                        request.getPassword()));
+        // Create user
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole("USER");
+        User savedUser = userRepository.save(user);
 
-                        // Load user details
-                        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-                        User user = userRepository.findByUsername(request.getUsername())
-                                        .orElseThrow(() -> new RuntimeException("User not found"));
+        // Auto-create wallet for the user
+        Account wallet = new Account();
+        wallet.setOwnerName(request.getName());
+        wallet.setAccountType(Account.AccountType.CHECKING);
+        wallet.setBalance(BigDecimal.ZERO);
+        wallet.setUserId(savedUser.getId());
+        accountRepository.save(wallet);
 
-                        // Generate new access token
-                        String accessToken = jwtUtil.generateToken(userDetails);
+        // Generate tokens
+        UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getEmail());
+        String accessToken = jwtUtil.generateToken(userDetails);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
 
-                        // Generate new refresh token
-                        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+        return ResponseEntity.ok(
+                new AuthResponse(accessToken, refreshToken.getToken(),
+                        savedUser.getName(),
+                        "Registration successful. Your wallet has been created."));
+    }
 
-                        return ResponseEntity.ok(
-                                        new AuthResponse(accessToken, refreshToken.getToken(),
-                                                        userDetails.getUsername(), "Login successful"));
-                } catch (BadCredentialsException e) {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                        .body(new AuthResponse(null, null, null, "Invalid username or password"));
-                } catch (Exception e) {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(new AuthResponse(null, null, null, "Login failed: " + e.getMessage()));
-                }
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest request) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(), request.getPassword()));
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
+            User user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            String accessToken = jwtUtil.generateToken(userDetails);
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+
+            return ResponseEntity.ok(
+                    new AuthResponse(accessToken, refreshToken.getToken(),
+                            user.getName(), "Login successful"));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new AuthResponse(null, null, null, "Invalid email or password"));
         }
+    }
 
-        @PostMapping("/refresh")
-        public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
-                try {
-                        String requestRefreshToken = request.getRefreshToken();
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
 
-                        // Find and validate refresh token
-                        RefreshToken refreshToken = refreshTokenService.findByToken(requestRefreshToken)
-                                        .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+        RefreshToken refreshToken = refreshTokenService.findByToken(requestRefreshToken)
+                .orElseThrow(() -> new RuntimeException("Refresh token not found"));
 
-                        // Verify it's not expired or revoked
-                        refreshTokenService.verifyExpiration(refreshToken);
+        refreshTokenService.verifyExpiration(refreshToken);
 
-                        // Get user and generate new access token
-                        User user = userRepository.findById(refreshToken.getUserId())
-                                        .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(refreshToken.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-                        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
-                        String newAccessToken = jwtUtil.generateToken(userDetails);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        String newAccessToken = jwtUtil.generateToken(userDetails);
 
-                        return ResponseEntity.ok(
-                                        new AuthResponse(newAccessToken, requestRefreshToken,
-                                                        user.getUsername(), "Token refreshed successfully"));
-                } catch (RuntimeException e) {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                        .body(new AuthResponse(null, null, null, e.getMessage()));
-                } catch (Exception e) {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(new AuthResponse(null, null, null,
-                                                        "Token refresh failed: " + e.getMessage()));
-                }
-        }
+        return ResponseEntity.ok(
+                new AuthResponse(newAccessToken, requestRefreshToken,
+                        user.getName(), "Token refreshed successfully"));
+    }
 
-        @PostMapping("/logout")
-        public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
-                try {
-                        // Revoke the refresh token
-                        refreshTokenService.revokeToken(request.getRefreshToken());
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        refreshTokenService.revokeToken(request.getRefreshToken());
+        return ResponseEntity.ok(new AuthResponse(null, null, null, "Logged out successfully"));
+    }
 
-                        return ResponseEntity.ok()
-                                        .body(new AuthResponse(null, null, null,
-                                                        "Logged out successfully"));
-                } catch (Exception e) {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(new AuthResponse(null, null, null,
-                                                        "Logout failed: " + e.getMessage()));
-                }
-        }
+    @PostMapping("/logout-all")
+    public ResponseEntity<?> logoutFromAllDevices() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
 
-        @PostMapping("/logout-all")
-        public ResponseEntity<?> logoutFromAllDevices() {
-                try {
-                        // Get authenticated user
-                        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-                        String username = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-                        User user = userRepository.findByUsername(username)
-                                        .orElseThrow(() -> new RuntimeException("User not found"));
-
-                        // Revoke all refresh tokens for this user
-                        refreshTokenService.revokeAllUserTokens(user.getId());
-
-                        return ResponseEntity.ok()
-                                        .body(new AuthResponse(null, null, null,
-                                                        "Logged out from all devices successfully"));
-                } catch (Exception e) {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(new AuthResponse(null, null, null,
-                                                        "Logout failed: " + e.getMessage()));
-                }
-        }
+        refreshTokenService.revokeAllUserTokens(user.getId());
+        return ResponseEntity.ok(new AuthResponse(null, null, null, "Logged out from all devices"));
+    }
 }

@@ -26,10 +26,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http.cors().and().csrf().disable()
                 .authorizeRequests()
+                // Allow public access to actuator health checks
+                .antMatchers("/actuator/**").permitAll()
+                // Allow Stripe webhook (called by Stripe servers, not users)
+                .antMatchers("/payments/webhook").permitAll()
                 // Allow public access to login/register/refresh
                 .antMatchers("/auth/register", "/auth/login", "/auth/refresh").permitAll()
+                // Allow account lookup by number (for transfers) - still requires JWT on calling service
+                .antMatchers("/accounts/by-number/**").authenticated()
                 // Require authentication for logout endpoints and other auth operations
                 .antMatchers("/auth/logout", "/auth/logout-all").authenticated()
                 // Require authentication for all other endpoints

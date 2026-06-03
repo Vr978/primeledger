@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Handle SPA routing - redirect all paths to index.html
+[[redirects]]
+  from = "/api/*"
+  to = "http://primeledger-alb-947365993.us-east-1.elb.amazonaws.com/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,0 +1,11 @@
+**/target/*.jar.original
+**/.git
+**/.gitignore
+**/README.md
+**/docker-compose.yml
+**/.kiro
+**/test_postman.json
+**/test_fixes.sh
+**/infra
+**/docs
+**/scripts

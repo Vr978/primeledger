@@ -1,32 +1,8 @@
-# Maven
+# ========================
+# Java / Maven
+# ========================
 target/
-*.pom
-*.xml.tag
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
-# https://github.com/takari/maven-wrapper#usage-without-binary-jar
-.mvn/wrapper/maven-wrapper.properties
-
-# Java Class Files
 *.class
-
-# Log Files
-*.log
-logs/
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
 *.nar
@@ -34,27 +10,69 @@ logs/
 *.zip
 *.tar.gz
 *.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+*.log
+logs/
 hs_err_pid*
 
-# IntelliJ IDEA
+# ========================
+# IDE
+# ========================
 .idea/
 *.iml
 *.iws
 *.ipr
 out/
-
-# VS Code
 .vscode/
 .history/
-
-# Mac
-.DS_Store
-
-# Eclipse
 .classpath
 .project
 .settings/
 .springBeans
 bin/
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# Environment / Secrets
+# ========================
+.env
+.env.local
+.env.production
+*.env
+
+# ========================
+# Kiro
+# ========================
+.kiro/
+
+# ========================
+# Node / Frontend
+# ========================
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.production
+frontend/.env.local
+
+# ========================
+# CDK / Infrastructure
+# ========================
+infra/node_modules/
+infra/cdk.out/
+infra/.env
+
+# ========================
+# Docker
+# ========================
+docker-compose.override.yml
+
+# ========================
+# Test outputs
+# ========================
+*.test-results/
+coverage/

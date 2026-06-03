@@ -1,105 +1,112 @@
 package com.example.transaction.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.math.BigDecimal;
 
 @Component
 public class AccountClient {
 
-    protected final WebClient webClient;
+    private final WebClient webClient;
 
-    @Autowired
-    public AccountClient(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8081").build();
+    public AccountClient(WebClient.Builder webClientBuilder,
+                         @Value("${account-service.url:http://localhost:8081}") String accountServiceUrl) {
+        this.webClient = webClientBuilder.baseUrl(accountServiceUrl).build();
     }
 
-    // Get account by ID
     public Account getAccount(Long accountId, String jwtToken) {
+        return webClient.get()
+                .uri("/accounts/" + accountId)
+                .header("Authorization", "Bearer " + jwtToken)
+                .retrieve()
+                .bodyToMono(Account.class)
+                .block();
+    }
+
+    public Account getAccountByNumber(String accountNumber, String jwtToken) {
         try {
             return webClient.get()
-                    .uri("/accounts/" + accountId)
+                    .uri("/accounts/by-number/" + accountNumber)
                     .header("Authorization", "Bearer " + jwtToken)
                     .retrieve()
                     .bodyToMono(Account.class)
                     .block();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch account: " + e.getMessage());
+            return null;
         }
     }
 
-    // Update account balance
-    public void updateAccountBalance(Long accountId, Double newBalance, String jwtToken) {
-        try {
-            Account account = getAccount(accountId, jwtToken);
-            account.setBalance(newBalance);
+    public void updateAccountBalance(Long accountId, BigDecimal newBalance, String jwtToken) {
+        BalanceUpdateRequest request = new BalanceUpdateRequest();
+        request.setNewBalance(newBalance);
 
-            webClient.put()
-                    .uri("/accounts/" + accountId)
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .bodyValue(account)
-                    .retrieve()
-                    .bodyToMono(Void.class)
-                    .block();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to update account balance: " + e.getMessage());
-        }
+        webClient.put()
+                .uri("/accounts/" + accountId + "/balance")
+                .header("Authorization", "Bearer " + jwtToken)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(Account.class)
+                .block();
     }
 
-    // Inner class to represent Account
+    // System-level balance update (for crediting transfer recipients)
+    // Uses the same endpoint but with the JWT of the sending user
+    // In production, this would use service-to-service auth
+    public void updateAccountBalanceSystem(Long accountId, BigDecimal newBalance, String jwtToken) {
+        BalanceUpdateRequest request = new BalanceUpdateRequest();
+        request.setNewBalance(newBalance);
+
+        webClient.put()
+                .uri("/accounts/" + accountId + "/balance")
+                .header("Authorization", "Bearer " + jwtToken)
+                .header("X-System-Call", "true")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(Account.class)
+                .block();
+    }
+
+    public Account[] getAllAccounts(String jwtToken) {
+        return webClient.get()
+                .uri("/accounts")
+                .header("Authorization", "Bearer " + jwtToken)
+                .retrieve()
+                .bodyToMono(Account[].class)
+                .block();
+    }
+
     public static class Account {
         private Long id;
+        private String accountNumber;
         private String ownerName;
-        private Double balance;
+        private BigDecimal balance;
         private Long userId;
+        private Long version;
+        private String accountType;
 
-        public Account() {
-        }
+        public Account() {}
 
-        public Long getId() {
-            return id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
-        }
-
-        public String getOwnerName() {
-            return ownerName;
-        }
-
-        public void setOwnerName(String ownerName) {
-            this.ownerName = ownerName;
-        }
-
-        public Double getBalance() {
-            return balance;
-        }
-
-        public void setBalance(Double balance) {
-            this.balance = balance;
-        }
-
-        public Long getUserId() {
-            return userId;
-        }
-
-        public void setUserId(Long userId) {
-            this.userId = userId;
-        }
+        public Long getId() { return id; }
+        public void setId(Long id) { this.id = id; }
+        public String getAccountNumber() { return accountNumber; }
+        public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
+        public String getOwnerName() { return ownerName; }
+        public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
+        public BigDecimal getBalance() { return balance; }
+        public void setBalance(BigDecimal balance) { this.balance = balance; }
+        public Long getUserId() { return userId; }
+        public void setUserId(Long userId) { this.userId = userId; }
+        public Long getVersion() { return version; }
+        public void setVersion(Long version) { this.version = version; }
+        public String getAccountType() { return accountType; }
+        public void setAccountType(String accountType) { this.accountType = accountType; }
     }
 
-    // Get all accounts for the authenticated user
-    public Account[] getAllAccounts(String jwtToken) {
-        try {
-            return webClient.get()
-                    .uri("/accounts")
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .retrieve()
-                    .bodyToMono(Account[].class)
-                    .block();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch accounts: " + e.getMessage());
-        }
+    public static class BalanceUpdateRequest {
+        private BigDecimal newBalance;
+        public BigDecimal getNewBalance() { return newBalance; }
+        public void setNewBalance(BigDecimal newBalance) { this.newBalance = newBalance; }
     }
 }

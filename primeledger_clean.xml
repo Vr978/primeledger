@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" version="21.0.0">
+  <diagram name="PrimeLedger AWS Architecture" id="pl-v3">
+    <mxGraphModel dx="1422" dy="762" grid="0" gridSize="10" guides="1"
+                  tooltips="1" connect="0" arrows="0" fold="0" page="1"
+                  pageScale="1" pageWidth="3000" pageHeight="1700"
+                  math="0" shadow="0">
+      <root>
+        <mxCell id="0"/><mxCell id="1" parent="0"/>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             LEGEND
+        ═══════════════════════════════════════════════════════════ -->
+        <mxCell id="leg" value="&lt;b&gt;Legend&lt;/b&gt; &amp;nbsp; ── Blue = HTTP Request &amp;nbsp;·&amp;nbsp; ─ ─ Green = Response &amp;nbsp;·&amp;nbsp; ─ ─ Orange = Async Event &amp;nbsp;·&amp;nbsp; ── Purple = Internal Call &amp;nbsp;·&amp;nbsp; ─ ─ Red = Config Inject &amp;nbsp;·&amp;nbsp; ─ ─ Gray = Infra"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666;fontSize=9;align=left;spacingLeft=8;verticalAlign=middle;"
+          vertex="1" parent="1">
+          <mxGeometry x="10" y="10" width="755" height="38" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ZONE BACKGROUNDS  (all parent="1", purely decorative)
+        ═══════════════════════════════════════════════════════════ -->
+
+        <mxCell id="z_ext" value="External"
+          style="swimlane;startSize=28;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;rounded=1;arcSize=3;pointerEvents=0;"
+          vertex="1" parent="1">
+          <mxGeometry x="10" y="58" width="215" height="1600" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="z_aws" value="AWS Cloud — us-east-1"
+          style="swimlane;startSize=34;fillColor=#fff8e1;strokeColor=#FF9900;fontStyle=1;fontSize=16;rounded=1;arcSize=2;pointerEvents=0;"
+          vertex="1" parent="1">
+          <mxGeometry x="245" y="38" width="2735" height="1640" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="z_vpc" value="VPC  (10.0.0.0/16  ·  2 AZs  ·  1 NAT Gateway)"
+          style="swimlane;startSize=26;fillColor=#e8f5e9;strokeColor=#388E3C;fontStyle=1;fontSize=12;rounded=1;arcSize=3;pointerEvents=0;"
+          vertex="1" parent="1">
+          <mxGeometry x="265" y="78" width="1860" height="1570" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="z_pub" value="Public Subnet"
+          style="swimlane;startSize=22;fillColor=#e3f2fd;strokeColor=#1565C0;fontStyle=0;fontSize=11;rounded=1;arcSize=4;pointerEvents=0;"
+          vertex="1" parent="1">
+          <mxGeometry x="285" y="112" width="330" height="260" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="z_ecs" value="Private Subnet  —  ECS Fargate Cluster  (primeledger)"
+          style="swimlane;startSize=26;fillColor=#fff3e0;strokeColor=#E65100;fontStyle=1;fontSize=12;rounded=1;arcSize=3;pointerEvents=0;"
+          vertex="1" parent="1">
+          <mxGeometry x="285" y="415" width="1820" height="570" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="z_data" value="Data Layer"
+          style="swimlane;startSize=22;fillColor=#ede7f6;strokeColor=#4527A0;fontStyle=1;fontSize=12;rounded=1;arcSize=4;pointerEvents=0;"
+          vertex="1" parent="1">
+          <mxGeometry x="285" y="1030" width="1820" height="590" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="z_supp" value="Supporting AWS Services"
+          style="swimlane;startSize=28;fillColor=#fafafa;strokeColor=#9E9E9E;fontStyle=1;fontSize=13;rounded=1;arcSize=3;pointerEvents=0;"
+          vertex="1" parent="1">
+          <mxGeometry x="2185" y="78" width="775" height="1570" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             EXTERNAL CLIENTS
+        ═══════════════════════════════════════════════════════════ -->
+
+        <mxCell id="ui" value="React UI (Netlify)"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.general;sketch=0;fontStyle=1;fontSize=11;fillColor=#00C7B7;strokeColor=#00897B;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="63" y="170" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="ui_d" value="Dashboard · Transactions · Transfer · Settings"
+          style="text;html=1;align=center;fontSize=9;strokeColor=none;fillColor=#dae8fc;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="18" y="265" width="184" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="stripe" value="Stripe API"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.internet_gateway;sketch=0;fontStyle=1;fontSize=11;fillColor=#635BFF;strokeColor=#4A44CC;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="63" y="650" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="stripe_d" value="Checkout Session  ·  Webhook: checkout.session.completed"
+          style="text;html=1;align=center;fontSize=9;strokeColor=none;fillColor=#dae8fc;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="12" y="745" width="204" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="k6" value="k6 Load Tests"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.management_console;sketch=0;fontStyle=1;fontSize=11;fillColor=#7D4F9A;strokeColor=#5A3670;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="63" y="1160" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="k6_d" value="functional · load · stress · spike  ·  BASE_URL = ALB DNS"
+          style="text;html=1;align=center;fontSize=9;strokeColor=none;fillColor=#dae8fc;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="12" y="1255" width="204" height="24" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ALB  (inside Public Subnet)
+        ═══════════════════════════════════════════════════════════ -->
+
+        <mxCell id="alb" value="Application Load Balancer"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.application_load_balancer;sketch=0;fontStyle=1;fontSize=11;fillColor=#E7157B;strokeColor=#AB0F59;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="345" y="155" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="alb_d" value="primeledger-alb  ·  Port 80  ·  60 s idle timeout&#xa;/auth/*  /accounts/*  /payments/*  → :8081&#xa;/transactions/*  → :8082&#xa;Health: /actuator/health"
+          style="text;html=1;align=left;fontSize=9;strokeColor=none;fillColor=#e3f2fd;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="280" y="250" width="260" height="58" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ECS FARGATE SERVICES
+             col centers:  Account=390  Tx=860  Kinesis=1290  Notif=1720
+        ═══════════════════════════════════════════════════════════ -->
+
+        <mxCell id="acc" value="Account Service  :8081"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.fargate;sketch=0;fontStyle=1;fontSize=11;fillColor=#3F8624;strokeColor=#2A5F17;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="350" y="500" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="acc_d" value="/auth/register  /auth/login  /auth/refresh  /auth/logout&#xa;/accounts  /accounts/{id}  /accounts/by-number/{n}&#xa;/payments/create-checkout-session  /payments/webhook&#xa;JwtAuthenticationFilter · BCrypt · RefreshTokenService&#xa;Auto-wallet on register:  PL-{year}-{6-random-digits}"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#f1f8e9;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="287" y="596" width="250" height="72" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="tx" value="Transaction Service  :8082"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.fargate;sketch=0;fontStyle=1;fontSize=11;fillColor=#1A6496;strokeColor=#0E3F5E;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="820" y="500" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="tx_d" value="/transactions/deposit  /withdraw  /transfer  /stats&#xa;GET /transactions  /categories  /frequent-recipients&#xa;AccountClient (WebClient) → Account :8081&#xa;EventPublisher: Kinesis (AWS) / Kafka (local)&#xa;Idempotency · @Version optimistic lock · Categories enum"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#e3f2fd;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="757" y="596" width="250" height="72" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="kin" value="Kinesis Data Stream"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.kinesis;sketch=0;fontStyle=1;fontSize=11;fillColor=#8B2BE2;strokeColor=#5E1D9A;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="1250" y="500" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="kin_d" value="primeledger-events  ·  On-demand mode&#xa;Auto-switches Kafka (local) → Kinesis (AWS)&#xa;via AWS env-var detection in EventPublisher&#xa;getRecords(limit=100)  ·  SHARD_LATEST"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#f3e5f5;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="1187" y="596" width="250" height="58" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="notif" value="Notification Service  :8083"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.fargate;sketch=0;fontStyle=1;fontSize=11;fillColor=#8B4513;strokeColor=#5C2D0A;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="1680" y="500" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="notif_d" value="KinesisConsumer: polls stream every 5 s (AWS prod)&#xa;TransactionConsumer: @KafkaListener (local dev)&#xa;Group: banking-group  ·  Topic: transactions&#xa;Processes DEPOSIT / WITHDRAW / TRANSFER events"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#fbe9e7;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="1617" y="596" width="250" height="58" as="geometry"/>
+        </mxCell>
+
+        <!-- Cloud Map label inside ECS zone -->
+        <mxCell id="cmap_lbl"
+          value="Cloud Map (primeledger.local)&#xa;account-service:8081 · transaction-service:8082 · notification-service:8083"
+          style="text;html=1;align=center;fontSize=8;strokeColor=#8C4FFF;fillColor=#ede7f6;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="900" y="448" width="500" height="32" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             DATA LAYER
+             col centers aligned with services above:
+               RDS=390  DDB-Verify=670  DDB-Idempotency=860  S3=1290
+        ═══════════════════════════════════════════════════════════ -->
+
+        <mxCell id="rds" value="RDS PostgreSQL 15"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;sketch=0;fontStyle=1;fontSize=11;fillColor=#2166AE;strokeColor=#13437A;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="350" y="1090" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="rds_d" value="T3.micro  ·  database: banking  ·  PostgreSQL 15&#xa;Tables: users · accounts · transactions · refresh_tokens&#xa;Flyway migrations  ·  @Version optimistic lock&#xa;BigDecimal(19,4) for money  ·  Instant timestamps"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#e3f2fd;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="287" y="1186" width="256" height="58" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ddb2" value="DynamoDB Verification"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;sketch=0;fontStyle=1;fontSize=11;fillColor=#E05243;strokeColor=#A3291F;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="630" y="1090" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="ddb2_d" value="PK: email (STRING)  ·  TTL: 5 minutes&#xa;6-digit email verification codes&#xa;PAY_PER_REQUEST  ·  Used by Account Service&#xa;endpoint: /auth/verify-email"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#fce4ec;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="567" y="1186" width="256" height="58" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ddb1" value="DynamoDB Idempotency"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;sketch=0;fontStyle=1;fontSize=11;fillColor=#E05243;strokeColor=#A3291F;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="820" y="1090" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="ddb1_d" value="PK: idempotencyKey (STRING)  ·  TTL enabled&#xa;PAY_PER_REQUEST  ·  Prevents duplicate writes&#xa;Checked by Transaction Service before every write&#xa;Key: userId:txType:timestamp"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#fce4ec;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="757" y="1186" width="256" height="58" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="s3" value="S3 Data Lake"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;sketch=0;fontStyle=1;fontSize=11;fillColor=#3F8624;strokeColor=#2A5F17;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="1250" y="1090" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3_d" value="Bucket: primeledger-datalake-*  ·  IA after 30 days&#xa;Future: Kinesis Firehose → Parquet → Glue → Athena&#xa;Analytics query endpoint  ·  Versioning: OFF"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#e8f5e9;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="1187" y="1186" width="256" height="48" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             SUPPORTING SERVICES
+             Col A center=2310  Col B center=2580
+             Row1 y=175  Row2 y=470  Row3 y=780  Row4 y=1090
+        ═══════════════════════════════════════════════════════════ -->
+
+        <!-- Secrets Manager (A1) -->
+        <mxCell id="secrets" value="Secrets Manager"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.secrets_manager;sketch=0;fontStyle=1;fontSize=10;fillColor=#DD344C;strokeColor=#A31C32;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="2270" y="175" width="72" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="secrets_d" value="primeledger/jwt-secret → JWT_SECRET&#xa;primeledger/db-credentials → DB_PASSWORD&#xa;Fetched by ECS tasks at container startup (CDK)"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#fce4ec;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="2208" y="261" width="218" height="44" as="geometry"/>
+        </mxCell>
+
+        <!-- ECR (B1) -->
+        <mxCell id="ecr" value="ECR  (Manual)"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ecr;sketch=0;fontStyle=1;fontSize=10;fillColor=#E05243;strokeColor=#A3291F;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="2544" y="175" width="72" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="ecr_d" value="primeledger/account-service :latest&#xa;primeledger/transaction-service :latest&#xa;primeledger/notification-service :latest&#xa;Base: eclipse-temurin:17-jre  ·  Created manually"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#fce4ec;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="2482" y="261" width="218" height="54" as="geometry"/>
+        </mxCell>
+
+        <!-- IAM Task Role (A2) -->
+        <mxCell id="iam" value="IAM Task Role"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.role;sketch=0;fontStyle=1;fontSize=10;fillColor=#DD344C;strokeColor=#A31C32;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="2270" y="470" width="72" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="iam_d" value="Task Role: DynamoDB R/W · Kinesis R/W&#xa;S3 PutObject · SES SendEmail&#xa;Secrets Manager: GetSecretValue&#xa;Exec Role: ECR pull · CW PutLogEvents"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#fce4ec;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="2208" y="556" width="218" height="54" as="geometry"/>
+        </mxCell>
+
+        <!-- CloudWatch Logs (B2) -->
+        <mxCell id="cw" value="CloudWatch Logs"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudwatch;sketch=0;fontStyle=1;fontSize=10;fillColor=#E7157B;strokeColor=#AB0F59;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="2544" y="470" width="72" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="cw_d" value="/ecs/primeledger/account-service&#xa;/ecs/primeledger/transaction-service&#xa;/ecs/primeledger/notification-service&#xa;Retention: 3 days  ·  Container Insights"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#fce4ec;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="2482" y="556" width="218" height="54" as="geometry"/>
+        </mxCell>
+
+        <!-- Amazon SES (centered, row 3) -->
+        <mxCell id="ses" value="Amazon SES"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ses;sketch=0;fontStyle=1;fontSize=10;fillColor=#E7157B;strokeColor=#AB0F59;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="2407" y="780" width="72" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="ses_d" value="Email verification codes (6-digit · 5-min TTL)&#xa;Transaction alerts: DEPOSIT/WITHDRAW/TRANSFER&#xa;Account Service: sends verify code on register&#xa;Notification Service: sends tx alert on event"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#fce4ec;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="2338" y="866" width="230" height="54" as="geometry"/>
+        </mxCell>
+
+        <!-- Cloud Map (centered, row 4) -->
+        <mxCell id="cloudmap" value="Cloud Map"
+          style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.route_53;sketch=0;fontStyle=1;fontSize=10;fillColor=#8C4FFF;strokeColor=#5A3199;fontColor=#000;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=none;"
+          vertex="1" parent="1">
+          <mxGeometry x="2407" y="1090" width="72" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="cloudmap_d" value="Namespace: primeledger.local&#xa;account-service.primeledger.local:8081&#xa;transaction-service.primeledger.local:8082&#xa;notification-service.primeledger.local:8083"
+          style="text;html=1;align=left;fontSize=8;strokeColor=none;fillColor=#ede7f6;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="2338" y="1176" width="230" height="54" as="geometry"/>
+        </mxCell>
+
+        <!-- CDK footer -->
+        <mxCell id="cdk"
+          value="☁️  Infrastructure as Code — AWS CDK (TypeScript)  ·  infra/lib/infra-stack.ts  ·  cdk deploy  /  cdk destroy --all  ·  ECR created manually (persists across deploys)  ·  $0 idle cost"
+          style="text;html=1;align=center;fontSize=11;fontStyle=1;strokeColor=#FF9900;fillColor=#FFF8E1;rounded=1;"
+          vertex="1" parent="1">
+          <mxGeometry x="265" y="1652" width="1400" height="28" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             EDGES
+             All at parent="1" — explicit waypoints routed through
+             clear gaps to avoid crossing text labels.
+        ═══════════════════════════════════════════════════════════ -->
+
+        <!-- E1  React UI → ALB  (HTTPS Request) -->
+        <mxCell id="e1" value="① HTTPS + Bearer JWT"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1F77B4;strokeWidth=3;fontColor=#1F77B4;fontStyle=1;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+          edge="1" source="ui" target="alb" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- E2  ALB → React UI  (HTTP Response) -->
+        <mxCell id="e2" value="200 OK · {accessToken, refreshToken, accounts[], transactions[]}"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2CA02C;strokeWidth=2;dashed=1;fontColor=#2CA02C;fontStyle=1;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;"
+          edge="1" source="alb" target="ui" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- E3  ALB → Account Service  (straight down, same col x=390) -->
+        <mxCell id="e3" value="② /auth/*  /accounts/*  /payments/*"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1F77B4;strokeWidth=3;fontColor=#1F77B4;fontStyle=1;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+          edge="1" source="alb" target="acc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- E4  ALB → Transaction Service  (right along y=195, down to tx) -->
+        <mxCell id="e4" value="③ /transactions/*"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1F77B4;strokeWidth=3;fontColor=#1F77B4;fontStyle=1;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+          edge="1" source="alb" target="tx" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="860" y="195"/>
+              <mxPoint x="860" y="395"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E5  Stripe → ALB  (Webhook, routes via x=215 to avoid UI icon) -->
+        <mxCell id="e5" value="Webhook: checkout.session.completed  (verify Stripe signature)"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#635BFF;strokeWidth=2;fontColor=#635BFF;fontStyle=1;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;"
+          edge="1" source="stripe" target="alb" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="215" y="650"/>
+              <mxPoint x="215" y="235"/>
+              <mxPoint x="345" y="235"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E6  Account → Stripe  (Create Checkout Session) -->
+        <mxCell id="e6" value="POST checkout session → {url, sessionId}"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#635BFF;strokeWidth=2;dashed=1;fontColor=#635BFF;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;"
+          edge="1" source="acc" target="stripe" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="222" y="540"/>
+              <mxPoint x="222" y="690"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E7  Transaction → Account  (Internal PUT /balance) -->
+        <mxCell id="e7" value="PUT /accounts/{id}/balance  ·  X-System-Call: true  (debit source / credit destination)"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#9467BD;strokeWidth=3;fontColor=#9467BD;fontStyle=1;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;"
+          edge="1" source="tx" target="acc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- E8  Account → RDS  (straight down, same col x=390) -->
+        <mxCell id="e8" value="users · accounts · refresh_tokens"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1F77B4;strokeWidth=2;fontColor=#1F77B4;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+          edge="1" source="acc" target="rds" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- E9  Account → DDB-Verification  (down then right) -->
+        <mxCell id="e9" value="store / verify 6-digit code"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#9467BD;strokeWidth=2;fontColor=#9467BD;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+          edge="1" source="acc" target="ddb2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="1012"/>
+              <mxPoint x="670" y="1012"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E10  Transaction → RDS  (down then left) -->
+        <mxCell id="e10" value="transactions table"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1F77B4;strokeWidth=2;fontColor=#1F77B4;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+          edge="1" source="tx" target="rds" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="860" y="1022"/>
+              <mxPoint x="390" y="1022"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E11  Transaction → DDB-Idempotency  (straight down, same col x=860) -->
+        <mxCell id="e11" value="check idempotency key"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#9467BD;strokeWidth=2;fontColor=#9467BD;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+          edge="1" source="tx" target="ddb1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- E12  Transaction → Kinesis  (horizontal right) -->
+        <mxCell id="e12" value="⑨ EventPublisher.publish()  {type, userId, amount, accountId}"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF7F0E;strokeWidth=3;dashed=1;fontColor=#FF7F0E;fontStyle=1;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+          edge="1" source="tx" target="kin" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- E13  Kinesis → Notification  (horizontal right) -->
+        <mxCell id="e13" value="⑩ poll every 5 s  ·  getRecords(100)  ·  SHARD_LATEST"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF7F0E;strokeWidth=3;dashed=1;fontColor=#FF7F0E;fontStyle=1;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+          edge="1" source="kin" target="notif" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- E14  Kinesis → S3  (straight down, same col x=1290) -->
+        <mxCell id="e14" value="Future: Firehose → Parquet"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF7F0E;strokeWidth=1;dashed=1;fontColor=#FF7F0E;fontSize=9;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+          edge="1" source="kin" target="s3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- E15  Notification → SES
+             Route: exit right of Notif → through VPC/Supporting gap (x=2155) →
+             down to SES level (y=816) → right into SES -->
+        <mxCell id="e15" value="⑪ ses:SendEmail  ·  transaction alert"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF7F0E;strokeWidth=2;dashed=1;fontColor=#FF7F0E;fontStyle=1;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+          edge="1" source="notif" target="ses" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2155" y="540"/>
+              <mxPoint x="2155" y="816"/>
+              <mxPoint x="2407" y="816"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E16  Secrets → Account
+             Route: exit left of Secrets → through gap (x=2155) →
+             down to subnet gap (y=395) → left to acc col (x=390) → down to acc top -->
+        <mxCell id="e16" value="Inject  JWT_SECRET + DB credentials"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#E74C3C;strokeWidth=2;dashed=1;fontColor=#E74C3C;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+          edge="1" source="secrets" target="acc" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2155" y="211"/>
+              <mxPoint x="2155" y="395"/>
+              <mxPoint x="390"  y="395"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E17  Secrets → Transaction
+             Route: same gap (x=2145, y=405) then left to tx col -->
+        <mxCell id="e17" value="Inject  JWT_SECRET + DB credentials"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#E74C3C;strokeWidth=2;dashed=1;fontColor=#E74C3C;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+          edge="1" source="secrets" target="tx" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2145" y="247"/>
+              <mxPoint x="2145" y="405"/>
+              <mxPoint x="860"  y="405"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E18  k6 → ALB  (right → up along x=248 → enter ALB bottom) -->
+        <mxCell id="e18" value="load test  ·  BASE_URL = ALB DNS"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7D4F9A;strokeWidth=2;fontColor=#7D4F9A;fontSize=10;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;"
+          edge="1" source="k6" target="alb" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="248" y="1200"/>
+              <mxPoint x="248" y="237"/>
+              <mxPoint x="385" y="237"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E19  All ECS services → CloudWatch  (represented via Notification)
+             Route: exit top-right of Notif → through gap (x=2155,y=500) → CW left -->
+        <mxCell id="e19" value="all services → /ecs/primeledger/* logs"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#9E9E9E;strokeWidth=1;dashed=1;fontColor=#9E9E9E;fontSize=9;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+          edge="1" source="notif" target="cw" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2155" y="500"/>
+              <mxPoint x="2544" y="500"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E20  ECR → ECS (image pull on task start)
+             Route: exit left of ECR → through gap (x=2155) → down to y=480 →
+             left to Notif top-right (x=1760, y=480) → Notif top -->
+        <mxCell id="e20" value="pull :latest image on task start"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#9E9E9E;strokeWidth=1;dashed=1;fontColor=#9E9E9E;fontSize=9;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;"
+          edge="1" source="ecr" target="notif" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2165" y="211"/>
+              <mxPoint x="2165" y="480"/>
+              <mxPoint x="1760" y="480"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E21  Account → SES  (email verification on register)
+             Route: exit acc bottom → down to subnet gap y=395 is used by e16/e17
+             Use y=386 different lane → right to SES via top route -->
+        <mxCell id="e21" value="ses:SendEmail  ·  6-digit verification code"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF7F0E;strokeWidth=1;dashed=1;fontColor=#FF7F0E;fontSize=9;labelBackgroundColor=#ffffff;labelBorderColor=#ccc;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;"
+          edge="1" source="acc" target="ses" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430"  y="475"/>
+              <mxPoint x="2165" y="475"/>
+              <mxPoint x="2165" y="780"/>
+              <mxPoint x="2407" y="780"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
