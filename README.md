@@ -19,7 +19,7 @@ This isn't a tutorial project. It was engineered to solve real distributed syste
 
 ## 🏗 System Architecture
 
-![Architecture Diagram](/primeledger/PrimeledgerWallet.png)
+![Architecture Diagram](PrimeledgerWallet.png)
 
 ### Why This Architecture?
 
